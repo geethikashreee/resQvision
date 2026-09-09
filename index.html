@@ -43,8 +43,82 @@ h2{font-family:Manrope;font-size:40px;line-height:1.08;letter-spacing:-.035em;co
 .citizen-access-card .primary{white-space:nowrap}
 @media(max-width:700px){.citizen-access-card{padding:24px;align-items:flex-start;flex-direction:column}.citizen-access-card .primary{width:100%;text-align:center}}
 </style>
+<style>
+/* Reference-style role sidebar */
+:root{--sidebar:#0f2438;--sidebar2:#122f49;--sidebarText:#eaf4f6;--sidebarMuted:#9bb1c2}
+.role-sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:214px;z-index:60;
+  background:linear-gradient(180deg,#0b1e30 0%,#102b46 58%,#0c2236 100%);
+  color:var(--sidebarText);padding:20px 14px 18px;
+  display:flex;flex-direction:column;box-shadow:10px 0 34px rgba(13,34,50,.14);
+}
+.role-brand{display:flex;align-items:center;gap:11px;padding:6px 8px 24px;border-bottom:1px solid rgba(255,255,255,.10)}
+.role-brand .logo{width:42px;height:42px;background:linear-gradient(135deg,#078b78,#0eaa96);border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,.16)}
+.role-brand strong{font-family:Manrope;font-size:18px;letter-spacing:-.02em}
+.role-brand small{display:block;color:var(--sidebarMuted);font-size:9px;margin-top:2px;letter-spacing:.08em;text-transform:uppercase}
+.role-title{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#87a2b6;padding:22px 9px 10px}
+.role-stack{display:grid;gap:9px}
+.role-tab{
+  display:flex;align-items:center;gap:11px;padding:13px 12px;border-radius:13px;
+  border:1px solid transparent;color:#dbe9ef;background:rgba(255,255,255,.03);
+  transition:transform .18s ease,background .18s ease,border-color .18s ease;
+}
+.role-tab:hover{transform:translateX(2px);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.09)}
+.role-tab.featured{background:linear-gradient(135deg,#078b78,#0a9d88);border-color:rgba(255,255,255,.14);box-shadow:0 12px 24px rgba(0,0,0,.16)}
+.role-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.10);font-size:16px}
+.role-tab.featured .role-icon{background:rgba(255,255,255,.14)}
+.role-copy strong{display:block;font-size:13px;line-height:1.1}
+.role-copy small{display:block;margin-top:4px;font-size:9px;color:#a9becd;font-weight:600}
+.role-tab.featured .role-copy small{color:#d8f5ef}
+.role-sidebar-note{margin-top:auto;padding:13px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:13px;color:#9db3c2;font-size:10px;line-height:1.55}
+.role-status{display:flex;align-items:center;gap:7px;margin-bottom:7px;color:#dce8ed;font-weight:700;font-size:10px}
+.role-status .dot{width:8px;height:8px;border-radius:50%;background:#38d09f;box-shadow:0 0 0 4px rgba(56,208,159,.12)}
+.nav, main, .footer{margin-left:214px}
+.nav-inner,.hero,.section,.cta,.footer-inner{max-width:1180px}
+@media(max-width:900px){
+  .role-sidebar{position:sticky;top:0;bottom:auto;width:100%;height:auto;display:block;padding:9px 10px;box-shadow:0 8px 24px rgba(13,34,50,.14)}
+  .role-brand{padding:2px 6px 9px;border-bottom:0}
+  .role-brand .logo{width:35px;height:35px}
+  .role-brand strong{font-size:16px}
+  .role-brand small{display:none}
+  .role-title{display:none}
+  .role-stack{display:flex;gap:7px}
+  .role-tab{flex:1;padding:9px 8px;justify-content:center}
+  .role-icon{width:28px;height:28px}
+  .role-copy small{display:none}
+  .role-copy strong{font-size:10px}
+  .role-sidebar-note{display:none}
+  .nav,main,.footer{margin-left:0}
+}
+</style>
 </head>
 <body>
+<aside class="role-sidebar" aria-label="ResQNet role access">
+  <div class="role-brand">
+    <span class="logo">R</span>
+    <div><strong>ResQNet</strong><small>Response Network</small></div>
+  </div>
+  <div class="role-title">Access workspace</div>
+  <div class="role-stack">
+    <a class="role-tab featured" href="volunteer.html">
+      <span class="role-icon">🤝</span>
+      <span class="role-copy"><strong>Volunteer</strong><small>Field dashboard →</small></span>
+    </a>
+    <a class="role-tab" href="admin.html">
+      <span class="role-icon">🛡️</span>
+      <span class="role-copy"><strong>Admin</strong><small>Operations control →</small></span>
+    </a>
+    <a class="role-tab" href="citizen.html">
+      <span class="role-icon">👥</span>
+      <span class="role-copy"><strong>Citizen</strong><small>Public access →</small></span>
+    </a>
+  </div>
+  <div class="role-sidebar-note">
+    <div class="role-status"><span class="dot"></span> System online</div>
+    Secure role-based access for ResQNet response workflows.
+  </div>
+</aside>
+
 <nav class="nav"><div class="nav-inner">
 <a class="brand" href="#"><span class="logo">R</span>ResQNet</a>
 <div class="navlinks"><a href="#about">About</a><a href="#workflow">How it works</a><a href="#capabilities">Capabilities</a><a class="navbtn" href="#start">Explore platform</a></div>
@@ -128,7 +202,7 @@ h2{font-family:Manrope;font-size:40px;line-height:1.08;letter-spacing:-.035em;co
 </div>
 </section>
 
-<section class="cta" id="start"><div class="cta-inner"><div><h2>Ready for step two?</h2><p>This homepage is the first stage. The next page can open the actual ResQNet workflow: report → verification → map → resources → response coordination → AI Copilot.</p></div><a class="primary" href="workspace.html">Open workspace →</a></div></section>
+<section class="cta" id="start"><div class="cta-inner"><div><h2>Role-based access</h2><p>Choose a role to continue. Volunteers get a focused field dashboard; admins can dispatch jobs and send alerts to volunteers.</p></div><a class="primary" href="workspace.html">Open workspace →</a></div></section>
 </main>
 
 <footer class="footer"><div class="footer-inner"><div>© 2026 ResQNet • Hackathon prototype</div><div class="credits">Real-photo sources: <a href="https://www.pexels.com/photo/emergency-flood-response-team-at-urban-neighborhood-28447788/" target="_blank" rel="noopener">Pexels</a> · <a href="https://commons.wikimedia.org/wiki/File:Indian_Air_Force_Relief_and_Rescue_Op_during_Tamil_Nadu_Flood_December_2015.jpg" target="_blank" rel="noopener">Wikimedia Commons / Indian Air Force</a></div></div></footer>
