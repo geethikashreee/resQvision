@@ -21,16 +21,16 @@
 <body>
 <div class="app">
 <aside class="sidebar">
-  <a class="brand" href="index.html"><span class="logo">R</span><span><strong>ResQNet</strong><small>Volunteer response</small></span></a>
+  <a class="brand" href="./index.html" title="Return to ResQNet Home"><span class="logo">R</span><span><strong>ResQNet</strong><small>Volunteer response</small></span></a>
   <div class="role"><b>Volunteer access</b><span>Operational view • limited permissions</span></div>
   <div class="side-title">My workspace</div>
   <nav class="side-links">
     <a class="active" href="#dashboard">▦ Dashboard</a><a href="#crisis">◉ Crisis map</a><a href="#resources">⌂ Hospitals & camps</a><a href="#alerts">! Alerts / jobs</a><a href="#network">◎ Nearby network</a><a href="#ai">✦ AI help</a>
   </nav>
-  <div class="side-bottom"><a class="home-link" href="index.html">← ResQNet home</a><a class="home-link" href="citizen.html">👤 Citizen access</a><a class="home-link" href="admin.html">⚙ Admin panel</a></div>
+  <div class="side-bottom"><a class="home-link" href="./index.html">⌂ ResQNet Home</a><a class="home-link" href="./workspace.html">↔ Switch workspace</a><a class="home-link" href="./citizen.html">👤 Citizen access</a><a class="home-link" href="./admin.html">⚙ Admin panel</a></div>
 </aside>
 <main class="main">
-<header class="topbar"><input class="search" placeholder="Search nearby crisis locations, hospitals, camps…"><div class="top-actions"><span class="pill">● Volunteer online</span><span class="avatar">V</span></div></header>
+<header class="topbar"><input class="search" placeholder="Search nearby crisis locations, hospitals, camps…"><div class="top-actions"><a href="./index.html" style="text-decoration:none;color:var(--navy);font-weight:800;font-size:12px;border:1px solid var(--line);padding:9px 12px;border-radius:10px;background:#fff">⌂ Home</a><a href="./workspace.html" style="text-decoration:none;color:var(--teal);font-weight:800;font-size:12px">Switch role</a><span class="pill">● Volunteer online</span><span class="avatar">V</span></div></header>
 <div class="content" id="dashboard">
 <section class="hero"><div><div class="eyebrow">Volunteer operations</div><h1>Respond where help is needed.</h1><p>See only the operational information a volunteer needs: nearby crisis locations, hospitals, rescue camps, available resources, admin job alerts, nearby responders and an AI help desk.</p></div><div class="hero-badge">Location: Chennai demo area</div></section>
 <div class="grid4"><div class="stat"><div class="label">Active crisis locations</div><div class="value">07</div><div class="delta">2 need immediate support</div></div><div class="stat"><div class="label">Nearby hospitals</div><div class="value">12</div><div class="delta">7 with emergency intake open</div></div><div class="stat"><div class="label">Rescue camps</div><div class="value">09</div><div class="delta">6 currently accepting people</div></div><div class="stat"><div class="label">Responders nearby</div><div class="value">31</div><div class="delta">18 volunteers · 13 rescue staff</div></div></div>
@@ -69,17 +69,22 @@ const markers=[
 markers.forEach(([p,c,t])=>L.circleMarker(p,{radius:8,fillColor:c,color:'#fff',weight:2,fillOpacity:.95}).addTo(map).bindPopup('<b>'+t+'</b><br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+p[0]+','+p[1]+'">Get directions ↗</a>'));
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 const seedJobs=[{id:'seed-1',title:'Flood support — Sector 7',location:'MKB Nagar, Chennai',priority:'HIGH',createdAt:Date.now()-8*60*1000,details:'Assist with safe movement of residents toward Relief Camp 04.',status:'OPEN'},{id:'seed-2',title:'Supply handoff — Riverside',location:'Riverside Junction, Chennai',priority:'MEDIUM',createdAt:Date.now()-21*60*1000,details:'Coordinate water and first-aid kit handoff with Rescue Team North.',status:'OPEN'}];
-let alerts=[]; const socket = (typeof io==='function' ? io({reconnection:false,timeout:1200}) : null);
+let alerts=[];
+// On GitHub Pages there is no Node API. Keep the UI usable and use the same-origin
+// API automatically when this page is hosted by the ResQNet server.
+const API_BASE = (location.protocol.startsWith('http') && location.hostname !== 'geethikashree.github.io') ? '' : '';
+const socket = (typeof io==='function' && location.hostname !== 'geethikashree.github.io' ? io({reconnection:false,timeout:1200}) : null);
 function timeAgo(ts){const m=Math.max(0,Math.floor((Date.now()-ts)/60000));return m<1?'just now':m+' min ago'}
 function renderJobs(){const jobs=alerts.length?alerts:seedJobs; const wrap=document.getElementById('jobsList'); wrap.innerHTML=''; document.getElementById('jobCount').textContent=jobs.length+' active';
  jobs.forEach(j=>{const el=document.createElement('div');el.className='job'; const dir=(j.lat&&j.lng)?`<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${j.lat},${j.lng}">Directions ↗</a>`:'';
  el.innerHTML='<div class="job-title"><strong>'+escapeHtml(j.title)+'</strong><span class="badge '+(j.priority==='HIGH'?'alert':'busy')+'">'+escapeHtml(j.priority)+'</span></div><small>'+escapeHtml(j.location)+' · '+timeAgo(j.createdAt||Date.now())+'<br>'+escapeHtml(j.details||'Admin assignment')+'</small><div class="job-actions"><button class="btn primary" data-id="'+escapeHtml(j.id)+'">Accept job</button>'+dir+'</div>'; wrap.appendChild(el); });
 }
-async function loadAlerts(){try{const r=await fetch('/api/alerts'); const d=await r.json(); alerts=d.alerts||[]; renderJobs();}catch(e){renderJobs();}}
-async function acceptJob(id){try{const r=await fetch('/api/alerts/'+encodeURIComponent(id)+'/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({volunteer:'Volunteer '+(localStorage.getItem('resqnet_volunteer_name')||'V1')})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Unable to accept'); toast('Job accepted: '+d.alert.title); loadAlerts();}catch(e){toast('Could not sync job acceptance. Check the server connection.')}}
+async function loadAlerts(){try{const r=await fetch(API_BASE+'/api/alerts'); const d=await r.json(); alerts=d.alerts||[]; renderJobs();}catch(e){renderJobs();}}
+async function acceptJob(id){try{const r=await fetch(API_BASE+'/api/alerts/'+encodeURIComponent(id)+'/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({volunteer:'Volunteer '+(localStorage.getItem('resqnet_volunteer_name')||'V1')})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Unable to accept'); toast('Job accepted: '+d.alert.title); loadAlerts();}catch(e){toast('Could not sync job acceptance. Check the server connection.')}}
 document.getElementById('jobsList').addEventListener('click',e=>{const b=e.target.closest('button[data-id]');if(b)acceptJob(b.dataset.id)});
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 if(socket){socket.on('connect',()=>toast('Real-time alerts connected'));socket.on('alerts:initial',data=>{alerts=data||[];renderJobs()});socket.on('alert:new',a=>{alerts=[a,...alerts.filter(x=>x.id!==a.id)];renderJobs();toast('🔔 New admin alert: '+a.title); if('Notification' in window && Notification.permission==='granted') new Notification('ResQNet alert',{body:a.title+' · '+a.location});});socket.on('alert:update',a=>{alerts=alerts.map(x=>x.id===a.id?a:x);renderJobs()});}
+localStorage.setItem('resqnet_role','volunteer');
 loadAlerts();
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
 
@@ -88,5 +93,5 @@ document.getElementById('locateBtn').addEventListener('click',()=>{if(!navigator
 // Working AI help desk: uses server-side OpenAI when OPENAI_API_KEY is configured.
 const form=document.getElementById('chatForm'),input=document.getElementById('chatInput'),messages=document.getElementById('messages');
 function addMsg(text,who){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
-form.addEventListener('submit',async e=>{e.preventDefault();const q=input.value.trim();if(!q)return;addMsg(q,'me');input.value='';const wait=document.createElement('div');wait.className='msg bot';wait.textContent='Thinking…';messages.appendChild(wait);try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q})});const d=await r.json();wait.textContent=d.reply||d.error||'No response.';}catch(err){wait.textContent='AI service is offline. Start the ResQNet server and try again.'}messages.scrollTop=messages.scrollHeight});
+form.addEventListener('submit',async e=>{e.preventDefault();const q=input.value.trim();if(!q)return;addMsg(q,'me');input.value='';const wait=document.createElement('div');wait.className='msg bot';wait.textContent='Thinking…';messages.appendChild(wait);try{const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q})});const d=await r.json();wait.textContent=d.reply||d.error||'No response.';}catch(err){wait.textContent='AI service is offline. Start the ResQNet server and try again.'}messages.scrollTop=messages.scrollHeight});
 </script></body></html>
