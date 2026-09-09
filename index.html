@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ResQNet — Crisis Intelligence & Response</title>
+<meta name="description" content="ResQNet brings crisis signals, incident intelligence, resources and response coordination into one live operational picture.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--navy:#102b46;--navy2:#193d5e;--teal:#078b78;--mint:#eaf8f5;--bg:#f5f7f9;--card:#fff;--ink:#172d41;--muted:#718394;--line:#dce5eb;--red:#d84b4b;--amber:#d58a21;--green:#13865f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif}
+a{text-decoration:none;color:inherit}.nav{height:68px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1000}.navin{height:100%;max-width:1240px;margin:auto;padding:0 22px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;color:var(--navy);font-size:20px;font-weight:800}.logo{width:36px;height:36px;background:var(--teal);border-radius:10px;color:#fff;display:grid;place-items:center;font-family:Manrope}.links{display:flex;gap:24px;align-items:center;font-size:13px;color:#64788a}.links a:hover{color:var(--teal)}.status{display:flex;gap:8px;align-items:center;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fafcfd;font-weight:700;color:#53697b}.liveDot{width:7px;height:7px;background:#19a77c;border-radius:50%;box-shadow:0 0 0 5px #19a77c15}
+.shell{max-width:1240px;margin:auto;padding:0 22px}.hero{padding:36px 0 22px}.crumb{font-size:11px;color:#8493a0;margin-bottom:12px}.crumb b{color:var(--teal)}.heroRow{display:flex;justify-content:space-between;gap:25px;align-items:end}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--teal);font-weight:800}.hero h1{font-family:Manrope;color:var(--navy);font-size:clamp(36px,5vw,59px);line-height:1.02;letter-spacing:-.045em;margin:9px 0 9px}.hero p{max-width:690px;color:var(--muted);line-height:1.65;font-size:15px;margin:0}.heroAside{text-align:right;font-size:11px;color:#8795a1}.heroAside strong{display:block;font-size:25px;color:var(--navy);font-family:Manrope}.dashboard{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 15px 45px #102b4610}.dashTop{height:52px;padding:0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.dashTop strong{font-size:13px;color:var(--navy)}.updated{font-size:10px;color:#8998a4}.dashBody{display:grid;grid-template-columns:1.6fr .9fr}.map{height:475px}.panel{border-left:1px solid var(--line);background:#fbfcfd}.panelHead{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.panelHead strong{font-size:12px;color:var(--navy)}.panelHead span{font-size:10px;color:#8a99a5}.metrics{display:grid;grid-template-columns:1fr 1fr;padding:12px;gap:8px}.metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}.metric b{font-family:Manrope;font-size:23px;color:var(--navy)}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:2px}.sectionTitle{padding:4px 12px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#8a99a5}.alert{margin:0 12px 8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.alertTop{display:flex;justify-content:space-between;gap:8px}.alert b{font-size:12px;color:var(--navy)}.alert small{display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:4px}.badge{font-size:8px;text-transform:uppercase;font-weight:800;border-radius:999px;padding:4px 6px;height:max-content}.critical{background:#fde9e9;color:#b63b3b}.high{background:#fff1db;color:#a66a14}.resource{background:#e6f6ef;color:#187451}
+.intel{padding:52px 0}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:20px}.kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--teal)}h2{font-family:Manrope;color:var(--navy);font-size:34px;letter-spacing:-.035em;margin:6px 0 0}.sectionHead p{max-width:500px;color:var(--muted);font-size:13px;line-height:1.6;margin:0}.grid3{display:grid;grid-template-columns:1.2fr .9fr .9fr;gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:19px}.card h3{font-family:Manrope;font-size:18px;color:var(--navy);margin:9px 0}.card p{color:var(--muted);font-size:12px;line-height:1.6;margin:0}.bigScore{font-family:Manrope;font-size:50px;color:var(--teal);line-height:1}.scoreLabel{font-size:10px;color:#8795a1;margin-top:4px}.bar{height:6px;background:#edf1f4;border-radius:99px;margin-top:14px;overflow:hidden}.bar i{display:block;width:82%;height:100%;background:var(--teal);border-radius:99px}.miniList{margin-top:15px}.mini{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #edf1f4;font-size:11px}.mini span{color:var(--muted)}.mini b{color:var(--navy)}
+.flow{padding:0 0 55px}.flowGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.flowCard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;position:relative}.flowNum{font-family:Manrope;font-size:29px;color:#b6dcd5}.flowCard h3{font-family:Manrope;font-size:17px;color:var(--navy);margin:10px 0 6px}.flowCard p{font-size:11px;line-height:1.55;color:var(--muted);margin:0}.flowCard:after{content:"→";position:absolute;right:-17px;top:49%;color:#8bbdb5;font-weight:800}.flowCard:last-child:after{display:none}
+.impact{padding-bottom:65px}.impactBox{background:var(--navy);border-radius:20px;padding:25px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.impactNode{padding:12px 14px;border:1px solid #ffffff20;background:#ffffff08;border-radius:11px;color:#fff;font-size:11px;text-align:center}.impactNode small{display:block;color:#b8ccd9;margin-top:3px;font-size:9px}.arrow{color:#76d7c7;font-weight:800}
+.cta{margin-bottom:65px}.ctaBox{background:linear-gradient(115deg,#087f70,#123b5b);border-radius:20px;padding:29px;display:flex;align-items:center;justify-content:space-between;gap:25px}.ctaBox h2{color:#fff;font-size:27px;margin:0 0 6px}.ctaBox p{color:#cfe0e5;font-size:12px;line-height:1.55;margin:0}.ctaBox a{background:#fff;color:var(--teal);font-weight:800;font-size:12px;padding:12px 15px;border-radius:10px;white-space:nowrap}
+footer{border-top:1px solid var(--line);background:#fff;color:#81909d;font-size:10px;padding:18px 0}.foot{display:flex;justify-content:space-between}.foot a{text-decoration:underline}
+@media(max-width:900px){.dashBody{grid-template-columns:1fr}.panel{border-left:0;border-top:1px solid var(--line)}.grid3{grid-template-columns:1fr 1fr}.flowGrid{grid-template-columns:1fr 1fr}.flowCard:after{display:none}.heroAside{display:none}}
+@media(max-width:600px){.links{display:none}.shell{padding:0 15px}.hero{padding-top:28px}.grid3,.flowGrid{grid-template-columns:1fr}.map{height:360px}.sectionHead{display:block}.sectionHead p{margin-top:10px}.impactBox{justify-content:flex-start}.arrow{transform:rotate(90deg)}.ctaBox{display:block}.ctaBox a{display:inline-block;margin-top:16px}.foot{display:block}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="navin">
+<a class="brand" href="#"><span class="logo">R</span>ResQNet</a>
+<div class="links"><a href="#situation">Situation</a><a href="#intelligence">Intelligence</a><a href="#workflow">Workflow</a><a class="status"><i class="liveDot"></i>Prototype live view</a></div>
+</div></nav>
+
+<main class="shell">
+<section class="hero">
+<div class="crumb">RESQNET / <b>CRISIS INTELLIGENCE</b></div>
+<div class="heroRow">
+<div><div class="eyebrow">Disaster response coordination</div><h1>A live lens on the crisis.</h1><p>ResQNet turns scattered incident reports and operational signals into one shared picture — so responders can see what is happening, where it is happening, what resources are nearby, and what may happen next.</p></div>
+<div class="heroAside"><strong>LIVE</strong>Response picture<br><span>Demo data · not for real emergency decisions</span></div>
+</div>
+</section>
+
+<section id="situation">
+<div class="dashboard">
+<div class="dashTop"><strong>Live Situation Overview</strong><span class="updated">Updated moments ago · Coimbatore demo zone</span></div>
+<div class="dashBody">
+<div id="map" class="map"></div>
+<aside class="panel">
+<div class="panelHead"><strong>Situation snapshot</strong><span>6 incidents</span></div>
+<div class="metrics">
+<div class="metric"><b>6</b><span>Active incidents</span></div><div class="metric"><b>18</b><span>People requesting help</span></div>
+<div class="metric"><b>3</b><span>Teams deployed</span></div><div class="metric"><b>120</b><span>Shelter spaces</span></div>
+</div>
+<div class="sectionTitle">Priority signals</div>
+<div class="alert"><div class="alertTop"><b>Flooding · Sector 7</b><span class="badge critical">Critical</span></div><small>Help needed · credibility 92% · Rescue Team A assigned</small></div>
+<div class="alert"><div class="alertTop"><b>Medical emergency · Gandhipuram</b><span class="badge high">High</span></div><small>Response in progress · Medical Unit 04</small></div>
+<div class="alert"><div class="alertTop"><b>Emergency Hospital</b><span class="badge resource">Resource</span></div><small>18 beds in prototype dataset · live availability requires provider integration</small></div>
+<div class="sectionTitle" style="margin-top:10px">Map legend</div>
+<div class="mini"><span>● Help needed</span><b style="color:#d84b4b">Priority</b></div>
+<div class="mini"><span>● Affected</span><b style="color:#d58a21">Monitor</b></div>
+<div class="mini"><span>● Resources</span><b style="color:#13865f">Available</b></div>
+</aside>
+</div>
+</div>
+</section>
+
+<section class="intel" id="intelligence">
+<div class="sectionHead"><div><div class="kicker">Crisis intelligence</div><h2>From raw signals to useful context.</h2></div><p>The product is designed around the same data-first principle as modern crisis-intelligence tools: put the important signals, scores, map and decision context in one place.</p></div>
+<div class="grid3">
+<article class="card"><div class="kicker">Current priority</div><div class="bigScore">92%</div><div class="scoreLabel">Example credibility score · Sector 7 flood</div><div class="bar"><i></i></div><p style="margin-top:12px">Multiple reports and location context support the signal. It remains a triage score, not a guarantee of truth.</p></article>
+<article class="card"><div class="kicker">Response brief</div><h3>What needs attention?</h3><p>Sector 7 flooding is the highest-priority demo incident. A medical emergency is already in response, while a shelter request remains active in the North Zone.</p><div class="miniList"><div class="mini"><span>Priority incidents</span><b>3</b></div><div class="mini"><span>Unassigned incidents</span><b>2</b></div></div></article>
+<article class="card"><div class="kicker">Nearby resources</div><h3>What is around it?</h3><p>ResQNet can place hospitals, ambulances, shelters and response teams beside an incident. In production, their status would come from authorized live systems.</p><div class="miniList"><div class="mini"><span>Hospital</span><b>Nearby</b></div><div class="mini"><span>Ambulance</span><b>3 demo</b></div><div class="mini"><span>Shelter</span><b>120 demo</b></div></div></article>
+</div>
+</section>
+
+<section class="flow" id="workflow">
+<div class="sectionHead"><div><div class="kicker">How ResQNet works</div><h2>One incident. Four connected stages.</h2></div><p>Every stage adds context until an authorized responder has a clearer picture of what needs attention.</p></div>
+<div class="flowGrid">
+<div class="flowCard"><div class="flowNum">01</div><h3>Capture</h3><p>Receive citizen, responder and authorized information-channel reports in a common incident format.</p></div>
+<div class="flowCard"><div class="flowNum">02</div><h3>Examine</h3><p>Assist credibility triage using source context, corroboration, timestamps and location consistency.</p></div>
+<div class="flowCard"><div class="flowNum">03</div><h3>Locate</h3><p>Put incidents, resources and response teams on the same geographic picture.</p></div>
+<div class="flowCard"><div class="flowNum">04</div><h3>Coordinate</h3><p>Explore resources and potential cascading effects, then support human decisions.</p></div>
+</div>
+</section>
+
+<section class="impact">
+<div class="sectionHead"><div><div class="kicker">Impact chain</div><h2>Look beyond the first incident.</h2></div><p>Potential dependencies can be surfaced for verification instead of treating a disaster as a single isolated event.</p></div>
+<div class="impactBox">
+<div class="impactNode">🌧 Flood<small>initial incident</small></div><div class="arrow">→</div>
+<div class="impactNode">🚧 Road blockage<small>access impact</small></div><div class="arrow">→</div>
+<div class="impactNode">🚑 Ambulance delay<small>response impact</small></div><div class="arrow">→</div>
+<div class="impactNode">🏥 Hospital pressure<small>service impact</small></div><div class="arrow">→</div>
+<div class="impactNode">🏠 Shelter demand<small>community impact</small></div>
+</div>
+</section>
+
+<section class="cta"><div class="ctaBox"><div><h2>See the system in action.</h2><p>Next step: submit a report, examine its credibility, locate it, check resources and use the AI Copilot.</p></div><a href="workspace.html">Enter response workspace →</a></div></section>
+</main>
+
+<footer><div class="shell foot"><span>© 2026 ResQNet · Hackathon prototype · All operational values shown here are demo/simulated data.</span><span>Inspired by data-first crisis intelligence UX, adapted for ResQNet.</span></div></footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map=L.map('map').setView([11.020,76.955],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
+const points=[
+[11.018,76.955,'#d84b4b','Flooding — Sector 7','Critical · Help needed'],
+[11.029,76.949,'#d58a21','Waterlogging — Saibaba Colony','High · Affected'],
+[11.010,76.962,'#d84b4b','Medical emergency — Gandhipuram','High · Help needed'],
+[11.025,76.966,'#d58a21','Infrastructure damage — RS Puram','Medium · Affected'],
+[11.042,76.928,'#d58a21','Landslide — Hill Road','Medium · Affected'],
+[11.034,76.978,'#d84b4b','Shelter request — North Zone','High · Help needed'],
+[11.015,76.948,'#13865f','Emergency Hospital','Resource · 18 demo beds'],
+[11.030,76.960,'#13865f','Relief Shelter','Resource · 120 demo spaces'],
+[11.006,76.970,'#13865f','Rescue Team A','Resource · Response team']
+];
+points.forEach(p=>{
+const icon=L.divIcon({className:'',html:`<div style="width:15px;height:15px;background:${p[2]};border:3px solid white;border-radius:50%;box-shadow:0 2px 8px #0005"></div>`,iconSize:[15,15],iconAnchor:[7.5,7.5]});
+L.marker([p[0],p[1]],{icon}).addTo(map).bindPopup(`<b>${p[3]}</b><br><span style="font-size:11px">${p[4]}</span>`);
+});
+</script>
+</body>
+</html>
