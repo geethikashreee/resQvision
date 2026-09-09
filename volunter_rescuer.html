@@ -27,7 +27,7 @@
   <nav class="side-links">
     <a class="active" href="#dashboard">▦ Dashboard</a><a href="#crisis">◉ Crisis map</a><a href="#resources">⌂ Hospitals & camps</a><a href="#alerts">! Alerts / jobs</a><a href="#network">◎ Nearby network</a><a href="#ai">✦ AI help</a>
   </nav>
-  <div class="side-bottom"><a class="home-link" href="index.html">← Back to ResQNet home</a><a class="home-link" href="admin.html">⚙ Admin panel (demo)</a></div>
+  <div class="side-bottom"><a class="home-link" href="index.html">← ResQNet home</a><a class="home-link" href="citizen.html">👤 Citizen access</a><a class="home-link" href="admin.html">⚙ Admin panel</a></div>
 </aside>
 <main class="main">
 <header class="topbar"><input class="search" placeholder="Search nearby crisis locations, hospitals, camps…"><div class="top-actions"><span class="pill">● Volunteer online</span><span class="avatar">V</span></div></header>
@@ -56,7 +56,7 @@
 </div>
 </div></main></div>
 <div class="toast" id="toast"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="/socket.io/socket.io.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 // Live map: Leaflet + OpenStreetMap
 const map=L.map('map',{zoomControl:true}).setView([13.0827,80.2707],11.6);
@@ -69,7 +69,7 @@ const markers=[
 markers.forEach(([p,c,t])=>L.circleMarker(p,{radius:8,fillColor:c,color:'#fff',weight:2,fillOpacity:.95}).addTo(map).bindPopup('<b>'+t+'</b><br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+p[0]+','+p[1]+'">Get directions ↗</a>'));
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 const seedJobs=[{id:'seed-1',title:'Flood support — Sector 7',location:'MKB Nagar, Chennai',priority:'HIGH',createdAt:Date.now()-8*60*1000,details:'Assist with safe movement of residents toward Relief Camp 04.',status:'OPEN'},{id:'seed-2',title:'Supply handoff — Riverside',location:'Riverside Junction, Chennai',priority:'MEDIUM',createdAt:Date.now()-21*60*1000,details:'Coordinate water and first-aid kit handoff with Rescue Team North.',status:'OPEN'}];
-let alerts=[]; const socket = io();
+let alerts=[]; const socket = (typeof io==='function' ? io({reconnection:false,timeout:1200}) : null);
 function timeAgo(ts){const m=Math.max(0,Math.floor((Date.now()-ts)/60000));return m<1?'just now':m+' min ago'}
 function renderJobs(){const jobs=alerts.length?alerts:seedJobs; const wrap=document.getElementById('jobsList'); wrap.innerHTML=''; document.getElementById('jobCount').textContent=jobs.length+' active';
  jobs.forEach(j=>{const el=document.createElement('div');el.className='job'; const dir=(j.lat&&j.lng)?`<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${j.lat},${j.lng}">Directions ↗</a>`:'';
@@ -79,10 +79,7 @@ async function loadAlerts(){try{const r=await fetch('/api/alerts'); const d=awai
 async function acceptJob(id){try{const r=await fetch('/api/alerts/'+encodeURIComponent(id)+'/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({volunteer:'Volunteer '+(localStorage.getItem('resqnet_volunteer_name')||'V1')})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Unable to accept'); toast('Job accepted: '+d.alert.title); loadAlerts();}catch(e){toast('Could not sync job acceptance. Check the server connection.')}}
 document.getElementById('jobsList').addEventListener('click',e=>{const b=e.target.closest('button[data-id]');if(b)acceptJob(b.dataset.id)});
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-socket.on('connect',()=>toast('Real-time alerts connected'));
-socket.on('alerts:initial',data=>{alerts=data||[];renderJobs()});
-socket.on('alert:new',a=>{alerts=[a,...alerts.filter(x=>x.id!==a.id)];renderJobs();toast('🔔 New admin alert: '+a.title); if('Notification' in window && Notification.permission==='granted') new Notification('ResQNet alert',{body:a.title+' · '+a.location});});
-socket.on('alert:update',a=>{alerts=alerts.map(x=>x.id===a.id?a:x);renderJobs()});
+if(socket){socket.on('connect',()=>toast('Real-time alerts connected'));socket.on('alerts:initial',data=>{alerts=data||[];renderJobs()});socket.on('alert:new',a=>{alerts=[a,...alerts.filter(x=>x.id!==a.id)];renderJobs();toast('🔔 New admin alert: '+a.title); if('Notification' in window && Notification.permission==='granted') new Notification('ResQNet alert',{body:a.title+' · '+a.location});});socket.on('alert:update',a=>{alerts=alerts.map(x=>x.id===a.id?a:x);renderJobs()});}
 loadAlerts();
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
 
