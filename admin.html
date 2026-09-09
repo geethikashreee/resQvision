@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ResQNet — Emergency Coordination Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--bg:#f4f7fa;--surface:#fff;--surface2:#f8fafc;--text:#142238;--muted:#6b7a90;--line:#dfe6ee;--brand:#087f6b;--brand2:#0d6fbe;--red:#d84c4c;--amber:#c57a08;--green:#148a6b;--purple:#7654c8;--shadow:0 8px 28px rgba(20,34,56,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;z-index:5}.brand{font-weight:800;font-size:21px;display:flex;gap:10px;align-items:center;padding:10px}.brand-badge{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center}.nav{margin-top:22px}.nav button{width:100%;text-align:left;background:transparent;padding:12px 13px;border-radius:10px;color:var(--muted);margin:2px 0}.nav button.active,.nav button:hover{background:#edf8f5;color:var(--brand);font-weight:700}.rolebox{position:absolute;bottom:18px;left:14px;right:14px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.rolebox small{display:block;color:var(--muted);margin-bottom:6px}.rolebox select{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.main{min-width:0}.topbar{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:4}.search{flex:1;max-width:620px;position:relative}.search input{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:11px 14px}.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;font-size:12px}.pill.live{color:var(--green);background:#eefaf6}.pill.demo{color:var(--amber);background:#fff8e8}.avatar{width:34px;height:34px;border-radius:50%;background:#dceaf7;display:grid;place-items:center;font-weight:700;color:#275b82}
+.content{padding:24px;max-width:1500px;margin:auto}.view{display:none}.view.active{display:block}.heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.heading h1{margin:0 0 5px;font-size:25px}.heading p{margin:0;color:var(--muted);font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{padding:10px 13px;border-radius:9px;background:#fff;border:1px solid var(--line);font-weight:600;color:var(--text)}.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.btn.warn{background:#fff6e8;color:#9b6200;border-color:#f0d29a}.btn.danger{background:#fff0f0;color:#a93030;border-color:#f2c1c1}
+.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(5,minmax(0,1fr));margin-bottom:14px}.card{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow)}.kpi{padding:16px}.kpi .label{font-size:12px;color:var(--muted)}.kpi .value{font-size:26px;font-weight:800;margin-top:7px}.kpi .delta{font-size:11px;margin-top:5px}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}.blue{color:var(--brand2)}
+.two{grid-template-columns:1.65fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.map{height:500px;border-radius:13px;overflow:hidden}.card-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.card-head h3{margin:0;font-size:14px}.card-body{padding:15px}.filters{display:flex;gap:6px;flex-wrap:wrap}.filter{font-size:11px;padding:7px 9px;border-radius:999px;background:#f4f6f8;color:var(--muted)}.filter.active{background:#e8f5f2;color:var(--brand);font-weight:700}
+.list{display:flex;flex-direction:column}.row{padding:12px 14px;border-bottom:1px solid #edf0f4;display:flex;gap:10px;align-items:flex-start}.row:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;margin-top:5px;background:var(--amber);flex:none}.dot.red{background:var(--red)}.dot.green{background:var(--green)}.dot.blue{background:var(--brand2)}.grow{flex:1}.row strong{font-size:12px}.row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.tag{font-size:10px;padding:4px 6px;border-radius:6px;background:#eef2f6;color:#526278}.tag.red{background:#fff0f0;color:#a93030}.tag.green{background:#edf9f5;color:#147a5f}.tag.amber{background:#fff7e8;color:#9a6307}.tag.blue{background:#edf5ff;color:#2a65a5}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px 10px;border-bottom:1px solid #edf0f4;text-align:left;font-size:12px;white-space:nowrap}.table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:#fbfcfd}.input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%}.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.toolbar .input{max-width:280px}
+.social-post{padding:13px 15px;border-bottom:1px solid #edf0f4}.social-post:last-child{border-bottom:0}.social-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted)}.social-post p{font-size:12px;line-height:1.5;margin:8px 0}.source{font-size:10px;padding:3px 6px;border-radius:5px;background:#eef2f6}.credbar{height:5px;background:#e9edf2;border-radius:99px;overflow:hidden}.credbar span{display:block;height:100%;background:var(--green)}
+.resource{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}.resource strong{font-size:12px}.resource .meta{font-size:11px;color:var(--muted);margin-top:5px}.status{font-size:10px;padding:4px 7px;border-radius:6px;float:right}.status.ok{background:#edf9f5;color:#147a5f}.status.warn{background:#fff7e8;color:#9a6307}.status.bad{background:#fff0f0;color:#a93030}
+.chat{height:570px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:15px}.msg{max-width:78%;padding:10px 12px;border-radius:11px;margin:7px 0;font-size:12px;line-height:1.5}.msg.user{margin-left:auto;background:#e8f5f2}.msg.ai{background:#f1f4f7}.chatbar{border-top:1px solid var(--line);padding:12px;display:flex;gap:8px}.chatbar textarea{flex:1;resize:none;height:44px;border:1px solid var(--line);border-radius:9px;padding:10px}.typing{font-size:11px;color:var(--muted);padding:0 15px 7px;display:none}
+.chain{display:flex;align-items:stretch;gap:8px;overflow:auto;padding-bottom:5px}.chain-node{min-width:170px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.chain-node .icon{font-size:20px}.chain-arrow{display:grid;place-items:center;color:#9aa8b8;font-weight:800}.impact{border-left:3px solid var(--amber);padding:10px 12px;background:#fffaf0;border-radius:0 8px 8px 0;margin-top:8px;font-size:12px}.lock{font-size:10px;color:#9b6200;background:#fff7e8;border:1px solid #f0d29a;border-radius:5px;padding:3px 6px}
+.modal{position:fixed;inset:0;background:rgba(12,25,40,.35);display:none;place-items:center;z-index:20;padding:20px}.modal.open{display:grid}.modal-card{background:#fff;width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:14px}.modal-body{padding:18px}.field{margin-bottom:12px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px}.field textarea{min-height:90px;resize:vertical}.modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.toast{position:fixed;right:20px;bottom:20px;background:#142238;color:#fff;padding:11px 14px;border-radius:9px;font-size:12px;display:none;z-index:50;box-shadow:var(--shadow)}
+.restricted{opacity:.65}.notice{padding:11px 13px;background:#eef5ff;border:1px solid #cfe1f7;border-radius:9px;font-size:12px;color:#2b5f91;margin-bottom:13px}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:1fr}.three{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.rolebox{position:static;margin-top:10px}.topbar{padding:0 12px}.content{padding:14px}.kpis{grid-template-columns:1fr 1fr}.three{grid-template-columns:1fr}.map{height:420px}.topbar .search{display:none}}
+
+.auth-gate{position:fixed;inset:0;background:linear-gradient(135deg,#071827,#0f3552);display:grid;place-items:center;padding:20px;z-index:100}.login-card{width:min(430px,100%);background:#fff;border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.3);padding:28px}.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:20px}.login-brand .logo{width:44px;height:44px}.login-card h1{font-family:Manrope;font-size:24px;margin:8px 0;color:var(--navy)}.login-card p{color:var(--muted);font-size:12px;line-height:1.6}.login-field{margin:14px 0}.login-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:#718699;margin-bottom:6px}.login-field input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px}.login-btn{width:100%;margin-top:8px}.login-error{display:none;padding:10px;border-radius:9px;background:#fff0f0;color:#a93030;font-size:11px;margin-top:10px}.demo-note{font-size:10px;color:#80909e;margin-top:12px;line-height:1.5}.secure-badge{display:inline-block;background:#eef8f5;color:var(--teal);padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800}
+</style>
+</head>
+<body><div id="authGate" class="auth-gate"><div class="login-card">
+  <div class="login-brand"><span class="logo">R</span><div><b style="font-family:Manrope;font-size:18px;color:var(--navy)">ResQNet</b><span style="display:block;font-size:10px;color:var(--muted)">Administrator portal</span></div></div>
+  <span class="secure-badge">● ADMIN ACCESS ONLY</span>
+  <h1>Sign in to Command Center</h1>
+  <p>Administrator credentials are required to access crisis social signals, incident verification, impact-chain analysis, dispatch controls and operational resources.</p>
+  <form id="loginForm">
+    <div class="login-field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" value="admin@resqnet.local" required></div>
+    <div class="login-field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Enter password" required></div>
+    <button class="btn primary login-btn" type="submit">Sign in as Administrator →</button>
+  </form>
+  <div id="loginError" class="login-error"></div>
+  <div class="demo-note"><b>Demo profile:</b> admin@resqnet.local / ResQNet@123<br>Change these credentials in the server environment before production.</div>
+</div></div>
+
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-badge">R</div> ResQNet</div>
+  <div class="nav">
+    <button class="active" data-view="dashboard">⌂ Command Center</button>
+    <button data-view="incidents">⚠ Incidents</button>
+    <button data-view="social">◉ Crisis Social Feed</button>
+    <button data-view="map">⌖ Live Map</button>
+    <button data-view="resources">＋ Hospitals & Resources</button>
+    <button data-view="teams">♟ Response Teams</button>
+    <button data-view="chain">↗ Impact Chain</button>
+    <button data-view="ai">✦ AI Copilot</button>
+    <button data-view="alerts" class="admin-only">🔔 Admin Alerts</button>
+  </div>
+  <div class="rolebox">
+     <small>Secure administrator profile</small>
+     <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div class="avatar" style="width:30px;height:30px">A</div><div><b style="font-size:12px">Incident Commander</b><span style="display:block;font-size:10px;color:var(--muted)">Administrator</span></div></div>
+     <button class="btn" style="width:100%;margin-top:10px" onclick="logoutAdmin()">Sign out</button>
+   </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="search"><input id="globalSearch" placeholder="Search incidents, locations, hospitals, social posts…"></div>
+  <div class="top-actions"><span class="pill live" id="dataMode">ADMIN SECURE SESSION</span><span class="pill" id="clock"></span><div class="avatar" id="avatar">A</div></div>
+</header>
+
+<div class="content">
+
+<section id="dashboard" class="view active">
+  <div class="heading"><div><h1>Emergency Command Center</h1><p>One operational picture for incidents, social signals, resources, teams and cascading impacts.</p></div><div class="actions"><button class="btn" onclick="locateMe()">Use my location</button><button class="btn primary" onclick="openModal('incidentModal')">+ New incident</button></div></div>
+  <div class="notice">External feeds are shown as <b>LIVE</b> only when an authorized connector is configured. Otherwise ResQNet uses clearly labelled demo data—never assume demo hospital, ambulance or social-media values are real.</div>
+  <div class="grid kpis">
+    <div class="card kpi"><div class="label">Active incidents</div><div class="value" id="kInc">6</div><div class="delta red">2 critical</div></div>
+    <div class="card kpi"><div class="label">People needing help</div><div class="value">148</div><div class="delta amber">+18 last hour</div></div>
+    <div class="card kpi"><div class="label">Teams deployed</div><div class="value">9</div><div class="delta green">7 responding</div></div>
+    <div class="card kpi"><div class="label">Medical capacity</div><div class="value" id="kMed">64%</div><div class="delta amber">Monitor surge</div></div>
+    <div class="card kpi"><div class="label">Credibility queue</div><div class="value">11</div><div class="delta blue">4 need review</div></div>
+  </div>
+  <div class="grid two">
+    <div class="card"><div class="card-head"><h3>Common operating map</h3><div class="filters"><button class="filter active" onclick="setMapFilter('all',this)">All</button><button class="filter" onclick="setMapFilter('help',this)">Help needed</button><button class="filter" onclick="setMapFilter('affected',this)">Affected</button><button class="filter" onclick="setMapFilter('resources',this)">Resources</button></div></div><div id="mapDash" class="map"></div></div>
+    <div class="card"><div class="card-head"><h3>Priority incidents</h3><button class="btn" onclick="showView('incidents')">View all</button></div><div id="priorityList" class="list"></div></div>
+  </div>
+  <div class="grid three" style="margin-top:14px">
+    <div class="card"><div class="card-head"><h3>Nearby medical & transport</h3></div><div class="card-body" id="resourceMini"></div></div>
+    <div class="card"><div class="card-head"><h3>Social crisis signals</h3><span class="tag blue">AI triage</span></div><div id="socialMini" class="list"></div></div>
+    <div class="card"><div class="card-head"><h3>Latest activity</h3></div><div id="activity" class="list"></div></div>
+  </div>
+</section>
+
+<section id="incidents" class="view">
+  <div class="heading"><div><h1>Incident Management</h1><p>Reports from public intake, field teams and approved social connectors.</p></div><div class="actions"><button class="btn" onclick="showView('social')">Review social signals</button><button class="btn primary" onclick="openModal('incidentModal')">+ Create incident</button></div></div>
+  <div class="card"><div class="card-body"><div class="toolbar"><input id="incidentSearch" class="input" placeholder="Filter incidents…" oninput="renderIncidents()"><select id="severityFilter" class="input" style="max-width:180px" onchange="renderIncidents()"><option value="">All severity</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th>Incident</th><th>Location</th><th>Severity</th><th>Credibility</th><th>Owner</th><th>Status</th><th>Action</th></tr></thead><tbody id="incidentTable"></tbody></table></div></div></div>
+</section>
+
+<section id="social" class="view">
+  <div class="heading"><div><h1>Crisis Social Feed</h1><p>Bring approved public posts into the same incident workflow. Verify before treating a post as fact.</p></div><div class="actions"><button class="btn" onclick="refreshSocial()">↻ Refresh</button><button class="btn primary admin-only" onclick="openModal('connectorModal')">+ Configure connector</button></div></div>
+  <div class="grid two">
+    <div class="card"><div class="card-head"><h3>Aggregated crisis posts</h3><span class="pill demo" id="socialMode">DEMO FEED</span></div><div id="socialFeed"></div></div>
+    <div class="card"><div class="card-head"><h3>Verification queue</h3></div><div class="card-body"><div class="notice">AI can prioritize signals, but an authorized human should confirm important reports before dispatch.</div><div id="verificationQueue"></div></div></div>
+  </div>
+</section>
+
+<section id="map" class="view">
+  <div class="heading"><div><h1>Live Map</h1><p>Incidents, social signals, hospitals, ambulances, shelters and team positions.</p></div><div class="actions"><button class="btn" onclick="fitMap()">Fit all</button><button class="btn" onclick="locateMe()">Locate me</button></div></div>
+  <div class="card"><div id="mapFull" class="map" style="height:650px"></div></div>
+</section>
+
+<section id="resources" class="view">
+  <div class="heading"><div><h1>Hospitals, Ambulances & Resources</h1><p>Check proximity and operational availability around an incident.</p></div><button class="btn primary" onclick="checkNearest()">Check near selected incident</button></div>
+  <div class="notice"><b>Live capacity requires a trusted hospital/EMS integration.</b> ResQNet does not invent bed counts or ambulance availability. The demo mode is explicitly marked.</div>
+  <div class="grid two"><div class="card"><div class="card-head"><h3>Resource status</h3><span class="pill demo" id="resourceMode">DEMO</span></div><div class="card-body"><div id="resourceGrid" class="grid" style="grid-template-columns:1fr 1fr"></div></div></div>
+  <div class="card"><div class="card-head"><h3>Nearest-resource analysis</h3></div><div class="card-body" id="nearestResult"><p style="color:var(--muted);font-size:12px">Select an incident to calculate proximity and cascading access risk.</p></div></div></div>
+</section>
+
+<section id="teams" class="view">
+  <div class="heading"><div><h1>Response Teams</h1><p>Volunteers can view tasks and submit field updates. Admins can dispatch and manage teams.</p></div><button class="btn primary admin-only" onclick="notifyTeams()">Notify nearby teams</button></div>
+  <div class="card"><div class="card-body"><div id="teamGrid" class="grid three"></div></div></div>
+</section>
+
+<section id="chain" class="view">
+  <div class="heading"><div><h1>After-Incident Impact Chain</h1><p>Model second-order effects instead of looking at the first incident in isolation.</p></div><div class="actions"><select id="chainIncident" class="input" style="max-width:250px"></select><button class="btn primary" onclick="runChain()">Run impact analysis</button></div></div>
+  <div class="grid two">
+    <div class="card"><div class="card-head"><h3>Cascade graph</h3><span class="tag amber">Decision support</span></div><div class="card-body"><div id="chainGraph" class="chain"></div><div id="chainImpacts"></div></div></div>
+    <div class="card"><div class="card-head"><h3>Recommended checks</h3></div><div class="card-body" id="chainRecommendations"></div></div>
+  </div>
+</section>
+
+<section id="ai" class="view">
+  <div class="heading"><div><h1>ResQNet AI Copilot</h1><p>Ask questions, summarize reports, compare resources, draft messages or explore an impact chain.</p></div><span class="pill" id="aiMode">SERVER AI + SAFE FALLBACK</span></div>
+  <div class="card chat"><div class="messages" id="messages"></div><div class="typing" id="typing">ResQNet AI is thinking…</div><div class="chatbar"><textarea id="chatInput" placeholder="Ask anything about the response workspace…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea><button class="btn primary" onclick="sendChat()">Send</button></div></div>
+</section>
+
+<section id="alerts" class="view">
+  <div class="heading"><div><h1>Admin Alerts</h1><p>Official outbound communications are restricted to administrators.</p></div><button class="btn primary" onclick="openModal('alertModal')">Draft official alert</button></div>
+  <div class="notice"><span class="lock">ADMIN ONLY</span> Volunteer accounts cannot publish official alerts, approve reports, change responder assignments, or edit trusted resource data.</div>
+  <div class="card"><div class="card-body" id="alertList"></div></div>
+</section>
+
+</div></main></div>
+
+<div id="incidentModal" class="modal"><div class="modal-card"><div class="card-head"><h3>Create incident</h3><button class="btn" onclick="closeModal('incidentModal')">×</button></div><div class="modal-body">
+<div class="field"><label>Incident type</label><input id="fType" value="Flooding"></div><div class="field"><label>Location</label><input id="fLoc" value="Current location"></div><div class="field"><label>Severity</label><select id="fSev"><option>critical</option><option>high</option><option selected>medium</option><option>low</option></select></div><div class="field"><label>Description</label><textarea id="fDesc" placeholder="What was observed? Separate observations from assumptions."></textarea></div>
+</div><div class="modal-foot"><button class="btn" onclick="closeModal('incidentModal')">Cancel</button><button class="btn primary" onclick="createIncident()">Create</button></div></div></div>
+
+<div id="connectorModal" class="modal"><div class="modal-card"><div class="card-head"><h3>Social connector setup</h3><button class="btn" onclick="closeModal('connectorModal')">×</button></div><div class="modal-body"><div class="notice">This prototype stores the connector configuration locally. Production connectors should use each platform's official API, OAuth, rate limits, moderation rules and organization approval.</div><div class="field"><label>Provider</label><select><option>Approved public feed / API adapter</option><option>Organization social account</option><option>Emergency media crawler</option></select></div><div class="field"><label>Feed / API endpoint</label><input placeholder="https://…"></div><div class="field"><label>Keywords</label><input value="flood, road blocked, rescue, hospital, ambulance"></div></div><div class="modal-foot"><button class="btn" onclick="closeModal('connectorModal')">Cancel</button><button class="btn primary" onclick="saveConnector()">Save connector</button></div></div></div>
+
+<div id="alertModal" class="modal"><div class="modal-card"><div class="card-head"><h3>Draft official alert</h3><button class="btn" onclick="closeModal('alertModal')">×</button></div><div class="modal-body"><div class="field"><label>Audience</label><select id="alertAudience"><option>Volunteers</option><option>Response teams</option><option>Public</option></select></div><div class="field"><label>Message</label><textarea id="alertText" placeholder="Write a verified, clear message…"></textarea></div></div><div class="modal-foot"><button class="btn" onclick="closeModal('alertModal')">Cancel</button><button class="btn primary" onclick="draftAlert()">Create draft</button></div></div></div>
+
+<div id="toast" class="toast"></div>
+<script>
+
+async function checkAdminSession(){if(sessionStorage.getItem('resq_demo_admin')==='1'){document.getElementById('authGate').style.display='none';const mode=document.getElementById('dataMode');if(location.protocol==='file:'&&mode){mode.textContent='OFFLINE DEMO MODE';mode.className='pill demo';}return true}try{const r=await fetch('/api/admin/me');const d=await r.json();if(d.authenticated){document.getElementById('authGate').style.display='none';return true}}catch(e){}document.getElementById('authGate').style.display='grid';return false}
+async function loginAdmin(e){e.preventDefault();const email=document.getElementById('adminEmail').value.trim();const password=document.getElementById('adminPassword').value;const err=document.getElementById('loginError');err.style.display='none';
+  try{
+    const r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Login failed');
+    sessionStorage.setItem('resq_demo_admin','1');
+    document.getElementById('authGate').style.display='none';
+    toast('Administrator session started.');
+  }catch(ex){
+    // File:// and static hosting without the Node API cannot call /api/admin/login.
+    // Keep a clearly-labeled offline demo login so the prototype remains usable.
+    if(email==='admin@resqnet.local' && password==='ResQNet@123'){
+      sessionStorage.setItem('resq_demo_admin','1');
+      document.getElementById('authGate').style.display='none';
+      const mode=document.getElementById('dataMode');
+      if(mode){mode.textContent='OFFLINE DEMO MODE';mode.className='pill demo';}
+      toast('Offline demo administrator access enabled.');
+      return;
+    }
+    err.textContent='Unable to reach the admin server. Use the demo credentials shown below or run the project with npm start.';
+    err.style.display='block';
+  }
+}
+
+async function logoutAdmin(){sessionStorage.removeItem('resq_demo_admin');await fetch('/api/admin/logout',{method:'POST'}).catch(()=>{});location.reload()}
+document.getElementById('loginForm').addEventListener('submit',loginAdmin);
+const incidents=[
+{id:1,type:'Flooding',severity:'critical',location:'Sector 7',cred:92,owner:'Rescue Team A',lat:11.018,lng:76.955,status:'Help needed',desc:'Road access blocked; residents requesting evacuation support.'},
+{id:2,type:'Waterlogging',severity:'high',location:'Saibaba Colony',cred:76,owner:'Unassigned',lat:11.029,lng:76.949,status:'Affected',desc:'Community media indicates heavy water accumulation.'},
+{id:3,type:'Medical emergency',severity:'high',location:'Gandhipuram',cred:88,owner:'Medical Unit 04',lat:11.010,lng:76.962,status:'In response',desc:'Medical assistance requested for multiple people.'},
+{id:4,type:'Infrastructure damage',severity:'medium',location:'RS Puram',cred:71,owner:'Engineering 2',lat:11.025,lng:76.966,status:'Affected',desc:'Reported structural damage requires assessment.'},
+{id:5,type:'Landslide',severity:'medium',location:'Hill Road',cred:67,owner:'Unassigned',lat:11.042,lng:76.928,status:'Affected',desc:'Slope movement reported; access verification pending.'},
+{id:6,type:'Shelter request',severity:'high',location:'North Zone',cred:84,owner:'Volunteer Hub',lat:11.034,lng:76.978,status:'Help needed',desc:'Families requesting temporary shelter.'}
+];
+let social=[
+{source:'Community Feed',user:'local_updates',time:'4 min ago',text:'Water rising near Sector 7. Several streets appear difficult to pass.',cred:81,location:'Sector 7'},
+{source:'Public Post',user:'city_watch',time:'11 min ago',text:'Traffic is backing up near Gandhipuram; possible road obstruction.',cred:73,location:'Gandhipuram'},
+{source:'Volunteer Network',user:'field_volunteer',time:'18 min ago',text:'Request for medical support and transport near North Zone.',cred:89,location:'North Zone'},
+{source:'Community Feed',user:'neighborhood_group',time:'24 min ago',text:'People are asking whether the nearby shelter still has capacity.',cred:64,location:'North Zone'}
+];
+const resources=[
+{name:'Emergency Hospital',kind:'Hospital',value:'18 beds',distance:'3.1 km',lat:11.012,lng:76.969,status:'Available',tone:'ok'},
+{name:'City Medical Center',kind:'Hospital',value:'7 beds',distance:'5.4 km',lat:11.031,lng:76.936,status:'Limited',tone:'warn'},
+{name:'Ambulance Unit 12',kind:'Ambulance',value:'Available',distance:'2.8 km',lat:11.021,lng:76.961,status:'Available',tone:'ok'},
+{name:'Ambulance Unit 19',kind:'Ambulance',value:'On task',distance:'4.2 km',lat:11.041,lng:76.955,status:'Busy',tone:'warn'},
+{name:'Relief Shelter',kind:'Shelter',value:'120 spaces',distance:'2.0 km',lat:11.034,lng:76.978,status:'Open',tone:'ok'},
+{name:'Water Kit Depot',kind:'Supplies',value:'240 kits',distance:'4.0 km',lat:11.003,lng:76.944,status:'Ready',tone:'ok'}
+];
+const teams=[
+{name:'Rescue Team A',specialty:'Water rescue',status:'Available',location:'2.4 km away',task:'Sector 7',admin:true},
+{name:'Medical Unit 04',specialty:'Medical support',status:'Responding',location:'Gandhipuram',task:'Medical emergency',admin:true},
+{name:'Volunteer Hub',specialty:'Shelter & supplies',status:'Available',location:'North Zone',task:'Shelter requests',admin:false},
+{name:'Fire Response 2',specialty:'Access & safety',status:'Responding',location:'RS Puram',task:'Infrastructure assessment',admin:true}
+];
+let map,fullMap,markers=[],fullMarkers=[],mapFilter='all',role='admin',aiHistory=[];
+const center=[11.02,76.955];
+
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));if(id==='map'&&!fullMap)setTimeout(initFullMap,50)}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(window._toast);window._toast=setTimeout(()=>e.style.display='none',2600)}
+function openModal(id){if(role!=='admin'&&id!=='connectorModal'){toast('Admin permission required for this action.');return}document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+role='admin';
+
+function initMap(el){const m=L.map(el).setView(center,13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(m);return m}
+function markerColor(i){return i.severity==='critical'?'red':i.status==='Help needed'?'orange':i.status==='Affected'?'blue':'green'}
+function addMarkers(m,store,filter='all'){store.forEach(x=>{let show=true;if(x.kind){show=filter==='all'||filter==='resources'}else if(filter==='help')show=x.status==='Help needed';else if(filter==='affected')show=x.status==='Affected';if(!show)return;const mk=L.circleMarker([x.lat,x.lng],{radius:x.kind?8:9,color:x.kind?'#2875d1':markerColor(x)==='red'?'#d84c4c':markerColor(x)==='orange'?'#c57a08':markerColor(x)==='blue'?'#2875d1':'#148a6b',fillOpacity:.8});mk.bindPopup(`<b>${x.kind||x.type}</b><br>${x.location||x.name}<br>${x.kind?(x.value+' · '+x.status):x.severity+' · credibility '+x.cred+'%'}`);mk.addTo(m);store.push(mk)})}
+function renderMap(){markers.forEach(x=>x.remove());markers=[];addMarkers(map,[...incidents,...resources],mapFilter)}
+function initDashMap(){if(!map){map=initMap('mapDash')}renderMap()}
+function initFullMap(){if(!fullMap){fullMap=initMap('mapFull')}fullMarkers.forEach(x=>x.remove());fullMarkers=[];addMarkers(fullMap,[...incidents,...resources],'all');setTimeout(()=>fullMap.invalidateSize(),100)}
+function fitMap(){if(fullMap){fullMap.fitBounds([[10.995,76.92],[11.055,76.99]])}else{map.fitBounds([[10.995,76.92],[11.055,76.99]])}}
+function locateMe(){navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];const m=fullMap||map;L.marker(ll).addTo(m).bindPopup('Your browser location').openPopup();m.setView(ll,14);toast('Location found on the map.')}):toast('Browser location is not available.')}
+function setMapFilter(f,b){mapFilter=f;document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderMap()}
+
+function renderPriority(){const el=document.getElementById('priorityList');el.innerHTML=incidents.filter(x=>x.severity==='critical'||x.severity==='high').slice(0,5).map(x=>`<div class="row"><div class="dot ${x.severity==='critical'?'red':''}"></div><div class="grow"><strong>${x.type} · ${x.location}</strong><small>${x.desc}</small></div><span class="tag ${x.severity==='critical'?'red':'amber'}">${x.severity}</span></div>`).join('')}
+function renderResources(){document.getElementById('resourceGrid').innerHTML=resources.map(r=>`<div class="resource"><span class="status ${r.tone}">${r.status}</span><strong>${r.name}</strong><div class="meta">${r.kind} · ${r.value} · ${r.distance}</div></div>`).join('');document.getElementById('resourceMini').innerHTML=resources.slice(0,4).map(r=>`<div class="row"><div class="dot ${r.kind==='Hospital'?'blue':'green'}"></div><div class="grow"><strong>${r.name}</strong><small>${r.kind} · ${r.value} · ${r.distance}</small></div><span class="tag ${r.tone==='warn'?'amber':'green'}">${r.status}</span></div>`).join('')}
+function renderSocial(){document.getElementById('socialFeed').innerHTML=social.map((s,i)=>`<div class="social-post"><div class="social-meta"><b>${s.user}</b><span>· ${s.time}</span><span class="source">${s.source}</span><span style="margin-left:auto">cred ${s.cred}%</span></div><p>${s.text}</p><div class="credbar"><span style="width:${s.cred}%"></span></div><div style="margin-top:8px;display:flex;gap:6px"><button class="btn" onclick="openSocialIncident(${i})">Open as signal</button>${role==='admin'?`<button class="btn primary" onclick="approveSocial(${i})">Approve</button>`:''}</div></div>`).join('');document.getElementById('socialMini').innerHTML=social.slice(0,3).map(s=>`<div class="row"><div class="dot amber"></div><div class="grow"><strong>${s.location}</strong><small>${s.text}</small></div><span class="tag blue">${s.cred}%</span></div>`).join('');document.getElementById('verificationQueue').innerHTML=social.map(s=>`<div class="resource" style="margin-bottom:8px"><strong>${s.location}</strong><div class="meta">${s.text}</div><div style="margin-top:7px"><span class="tag ${s.cred>=80?'green':'amber'}">${s.cred>=80?'higher confidence':'needs review'}</span></div></div>`).join('')}
+function openSocialIncident(i){const s=social[i];document.getElementById('fType').value='Social signal';document.getElementById('fLoc').value=s.location;document.getElementById('fDesc').value=s.text+' Source: '+s.source+'. Credibility score is triage only.';openModal('incidentModal')}
+function approveSocial(i){if(role!=='admin')return toast('Admin permission required.');social[i].approved=true;toast('Signal approved for operational review.');renderSocial()}
+function refreshSocial(){toast('Refreshing approved social connectors…');setTimeout(()=>{social.unshift({source:'Community Feed',user:'new_signal',time:'just now',text:'New public signal received and queued for credibility review.',cred:62,location:'Sector 7'});renderSocial()},700)}
+function saveConnector(){closeModal('connectorModal');document.getElementById('socialMode').textContent='CONNECTOR SAVED';document.getElementById('socialMode').className='pill live';toast('Connector saved in prototype settings. Configure server credentials for live ingestion.')}
+function renderIncidents(){const q=(document.getElementById('incidentSearch')?.value||'').toLowerCase(),sev=document.getElementById('severityFilter')?.value||'';document.getElementById('incidentTable').innerHTML=incidents.filter(x=>(!sev||x.severity===sev)&&(!q||JSON.stringify(x).toLowerCase().includes(q))).map(x=>`<tr><td><b>${x.type}</b><br><small>${x.desc}</small></td><td>${x.location}</td><td><span class="tag ${x.severity==='critical'?'red':x.severity==='high'?'amber':'blue'}">${x.severity}</span></td><td>${x.cred}%</td><td>${x.owner}</td><td>${x.status}</td><td><button class="btn" onclick="focusIncident(${x.id})">Map</button></td></tr>`).join('')}
+function focusIncident(id){const x=incidents.find(i=>i.id===id);showView('map');setTimeout(()=>{if(!fullMap)initFullMap();fullMap.setView([x.lat,x.lng],15);L.popup().setLatLng([x.lat,x.lng]).setContent(`<b>${x.type}</b><br>${x.location}<br>${x.desc}`).openOn(fullMap)},100)}
+function createIncident(){const x={id:Date.now(),type:document.getElementById('fType').value||'Incident',severity:document.getElementById('fSev').value,location:document.getElementById('fLoc').value||'Unknown',cred:55,owner:'Unassigned',lat:11.02,lng:76.955,status:'Needs review',desc:document.getElementById('fDesc').value||'New report submitted.'};incidents.unshift(x);closeModal('incidentModal');renderAll();toast('Incident created and queued for review.')}
+function renderTeams(){document.getElementById('teamGrid').innerHTML=teams.map(t=>`<div class="resource"><span class="status ${t.status==='Available'?'ok':'warn'}">${t.status}</span><strong>${t.name}</strong><div class="meta">${t.specialty}</div><div class="meta">Location: ${t.location}</div><div class="meta">Task: ${t.task}</div><div style="margin-top:9px;display:flex;gap:6px">${role==='admin'?`<button class="btn" onclick="toast('Team notified.')">Notify</button>`:''}<button class="btn" onclick="toast('Task update request sent.')">Update</button></div></div>`).join('')}
+function notifyTeams(){if(role!=='admin')return toast('Admin permission required.');toast('Nearby response teams notified through the configured channel.')}
+function checkNearest(){const x=incidents[0];const nearby=resources.filter(r=>r.kind==='Hospital'||r.kind==='Ambulance');document.getElementById('nearestResult').innerHTML=`<div class="notice">For <b>${x.type} · ${x.location}</b>, the closest configured resources are shown below. Live availability must come from an authorized provider.</div>`+nearby.map(r=>`<div class="resource" style="margin-bottom:8px"><strong>${r.name}</strong><span class="status ${r.tone}">${r.status}</span><div class="meta">${r.kind} · ${r.value} · ${r.distance}</div><div class="impact">${r.kind==='Hospital'&&r.status==='Limited'?'Potential downstream impact: consider alternate receiving facility and re-check access route.':r.kind==='Ambulance'&&r.status!=='Available'?'Potential delay: unit is not currently free. Check another unit.':'No demo warning generated.'}</div></div>`).join('');showView('resources')}
+function renderChainOptions(){document.getElementById('chainIncident').innerHTML=incidents.map(x=>`<option value="${x.id}">${x.type} · ${x.location}</option>`).join('')}
+function runChain(){const x=incidents.find(i=>i.id==document.getElementById('chainIncident').value)||incidents[0];let nodes=[],impacts=[],recs=[];if(/flood|water/i.test(x.type)){nodes=[['🌧️','Flooding'],['⛔','Road access reduced'],['🚑','Ambulance ETA increases'],['🏥','Hospital access/capacity risk'],['🏠','Shelter demand rises']];impacts=['Road closure can delay response vehicles.','A blocked route can make the nearest hospital less useful even if beds exist.','If medical capacity tightens, reroute to the next verified receiving facility.','Shelter demand may increase as households lose access to safe areas.'];recs=['Check road-closure feed and alternate routes.','Re-check ambulance status before dispatch.','Compare at least two verified receiving facilities.','Notify shelter coordinators if demand crosses threshold.']}else if(/medical/i.test(x.type)){nodes=[['🚑','Medical demand'],['🏥','Hospital capacity'],['🚗','Traffic / access'],['🛏️','Alternate facility load']];impacts=['A demand spike can reduce available receiving capacity.','Traffic restrictions can change the nearest practical facility.','Redirecting patients may create secondary capacity pressure elsewhere.'];recs=['Refresh live bed/acceptance status.','Check ambulance availability and route.','Monitor alternate-facility capacity.']}else{nodes=[['⚠️',x.type],['🛣️','Access / infrastructure'],['🚑','Response logistics'],['🏥','Medical / shelter capacity']];impacts=['Infrastructure disruption can affect travel time and resource reach.','Secondary demand may appear at nearby shelters or hospitals.'];recs=['Verify access conditions.','Refresh nearby resource status.','Monitor new reports around the incident perimeter.']}document.getElementById('chainGraph').innerHTML=nodes.map((n,i)=>(i?'<div class="chain-arrow">→</div>':'')+`<div class="chain-node"><div class="icon">${n[0]}</div><b style="font-size:12px">${n[1]}</b></div>`).join('');document.getElementById('chainImpacts').innerHTML=impacts.map(t=>`<div class="impact">${t}</div>`).join('');document.getElementById('chainRecommendations').innerHTML=recs.map((r,i)=>`<div class="row"><div class="dot ${i===0?'red':'blue'}"></div><div class="grow"><strong>Check ${i+1}</strong><small>${r}</small></div></div>`).join('')}
+function renderActivity(){document.getElementById('activity').innerHTML=['Social signal queued for credibility review','Ambulance Unit 12 status refreshed','Volunteer field update received','Sector 7 incident linked to impact chain'].map((x,i)=>`<div class="row"><div class="dot ${i===0?'amber':'blue'}"></div><div class="grow"><strong>${x}</strong><small>${i+2} min ago</small></div></div>`).join('')}
+async function sendChat(){const input=document.getElementById('chatInput'),text=input.value.trim();if(!text)return;appendMsg(text,'user');input.value='';document.getElementById('typing').style.display='block';try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,role,context:{incidents,resources,social: social.slice(0,5)}})});if(!r.ok)throw Error();const d=await r.json();appendMsg(d.reply||'I could not generate a response.','ai')}catch(e){appendMsg(localAI(text),'ai')}finally{document.getElementById('typing').style.display='none'}}
+function appendMsg(t,who){const el=document.getElementById('messages');const d=document.createElement('div');d.className='msg '+who;d.textContent=t;el.appendChild(d);el.scrollTop=el.scrollHeight}
+function localAI(q){const l=q.toLowerCase();if(l.includes('hospital')||l.includes('ambulance'))return 'I can compare the configured nearby hospital and ambulance records. In this prototype, availability is demo data unless a trusted live provider is connected. I would re-check capacity and route access before dispatch.';if(l.includes('road')||l.includes('blocked'))return 'A road blockage can create a cascade: longer travel time → delayed ambulance arrival → reduced practical hospital access → possible load on alternate facilities. Open Impact Chain to model the incident.';if(l.includes('social')||l.includes('post'))return 'Social posts are treated as signals, not facts. ResQNet ranks them for review, links them to locations, and lets an authorized admin approve important reports before operational use.';if(l.includes('summary'))return 'Current demo picture: 6 active incidents, 2 critical/high-priority medical or access concerns, social signals awaiting review, and configured hospital/ambulance resources with demo availability. Check the map and resource panel for details.';return 'I can help with incident summaries, resource checks, social-signal triage, response coordination, impact-chain analysis, and drafting clear updates. For safety, I will distinguish verified data from unverified or demo information.'}
+function draftAlert(){if(role!=='admin')return toast('Admin permission required.');const t=document.getElementById('alertText').value.trim();if(!t)return toast('Add an alert message first.');closeModal('alertModal');document.getElementById('alertList').innerHTML=`<div class="resource"><span class="status warn">DRAFT</span><strong>${document.getElementById('alertAudience').value}</strong><div class="meta">${t}</div><div style="margin-top:8px"><button class="btn primary" onclick="toast('Demo: alert would be published after authorization.')">Publish</button></div></div>`;toast('Official alert draft created.')}
+function renderAll(){renderPriority();renderResources();renderSocial();renderIncidents();renderTeams();renderChainOptions();renderActivity();renderAlert();initDashMap()}
+function renderAlert(){document.getElementById('alertList').innerHTML='<div class="resource"><strong>No published alerts in demo workspace</strong><div class="meta">Use the admin-only draft action to prepare an official message.</div></div>'}
+document.getElementById('globalSearch').oninput=e=>{const q=e.target.value.toLowerCase();if(!q)return;const i=incidents.find(x=>JSON.stringify(x).toLowerCase().includes(q));if(i)focusIncident(i.id)}
+function clock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}setInterval(clock,1000);clock();
+(async()=>{const ok=await checkAdminSession();if(ok){renderAll();runChain();appendMsg('Hello — I am the ResQNet AI Copilot. Ask me about incidents, social signals, hospitals, ambulances, teams, or cascading impacts.','ai')}})();
+</script>
+</body></html>
