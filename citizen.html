@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ResQNet — Citizen Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--navy:#102b46;--navy2:#173b5f;--teal:#078b78;--mint:#eaf8f5;--red:#d95858;--orange:#d99028;--blue:#2d6cdf;--muted:#667a8d;--line:#dbe5ed;--bg:#f3f7f9;--white:#fff;--shadow:0 14px 35px rgba(16,43,70,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--navy);font-family:"DM Sans",sans-serif}a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer}
+.top{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;position:sticky;top:0;z-index:50}.topin{max-width:1240px;width:100%;margin:auto;padding:0 30px;display:flex;justify-content:space-between;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px}.logo{width:40px;height:40px;border-radius:12px;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:Manrope}.navlinks{display:flex;align-items:center;gap:9px}.navlinks a,.back{font-size:12px;color:#61768a;padding:9px 11px;border-radius:9px}.navlinks a:hover,.back:hover{background:#f4f7f9;color:var(--navy)}
+.main{max-width:1240px;margin:auto;padding:34px 30px 80px}.eyebrow{color:var(--teal);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;margin-bottom:22px}.hero h1{font:800 40px/1.08 Manrope;margin:8px 0 10px;letter-spacing:-.02em}.hero p{max-width:760px;color:var(--muted);line-height:1.7;margin:0}.location{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 15px;min-width:245px;box-shadow:var(--shadow)}.location b{font-size:12px}.location small{display:block;color:var(--muted);margin:4px 0 10px}.locbtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:700;color:var(--navy)}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 18px}.quickcard{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;box-shadow:var(--shadow)}.quickcard .qtop{display:flex;justify-content:space-between;align-items:center}.quickcard strong{font:800 14px Manrope}.qvalue{font:800 22px Manrope;margin-top:7px}.qmeta{font-size:10px;color:var(--muted);margin-top:3px}.qicon{width:32px;height:32px;border-radius:10px;background:#eef5f8;display:grid;place-items:center}
+.grid{display:grid;grid-template-columns:1.35fr .95fr;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:19px;overflow:hidden;box-shadow:var(--shadow)}.panelhead{padding:18px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panelhead h2{font:800 19px Manrope;margin:0}.sub{display:block;color:var(--muted);font-size:11px;margin-top:4px}.headactions{display:flex;gap:8px;align-items:center}.primary{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:10px 13px;font-size:11px;font-weight:800;box-shadow:0 7px 18px rgba(7,139,120,.2)}.secondary{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:10px;padding:10px 13px;font-size:11px;font-weight:800}
+#map{height:430px}.mapfoot{padding:13px 17px;display:flex;gap:9px;flex-wrap:wrap;border-top:1px solid var(--line)}.pill{font-size:10px;padding:7px 10px;border-radius:999px;background:#f1f6f8;color:#536d80}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.red{background:var(--red)}.green{background:var(--teal)}.orange{background:var(--orange)}
+.resources{display:grid;gap:10px;padding:15px}.resource{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fbfdfe}.rline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.resource strong{font-size:13px}.status{font-size:9px;font-weight:800;padding:5px 8px;border-radius:999px;white-space:nowrap}.available{background:var(--mint);color:var(--teal)}.limited{background:#fff5df;color:#a96d0c}.resource p{font-size:10px;color:var(--muted);margin:8px 0 0;line-height:1.55}.capacity{height:6px;background:#e9eff3;border-radius:99px;margin-top:10px;overflow:hidden}.capacity span{display:block;height:100%;background:var(--teal);border-radius:99px}.mini{margin-top:11px;display:flex;justify-content:space-between;color:#718497;font-size:9px}.view{margin-top:9px;border:0;background:transparent;color:var(--teal);font-weight:800;font-size:10px;padding:0}
+.camera{margin-top:18px}.cameraimg{width:100%;height:220px;object-fit:cover;display:block}.caminfo{padding:15px 17px}.camrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.live{color:#d14f4f;font-size:10px;font-weight:800}.live i{display:inline-block;width:7px;height:7px;background:#e05252;border-radius:50%;margin-right:5px;box-shadow:0 0 0 4px #e0525218}.caminfo h3{font:800 16px Manrope;margin:8px 0 4px}.caminfo p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}.camactions{display:flex;gap:8px;margin-top:13px}
+.incidents{margin-top:18px}.incidentlist{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;padding:15px}.incident{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}.incident h3{font-size:13px;margin:0 0 7px}.incident p{font-size:10px;color:var(--muted);margin:0;line-height:1.55}.badge{display:inline-block;font-size:9px;font-weight:800;padding:5px 7px;border-radius:7px;background:#fff0f0;color:#b44b4b;margin-bottom:8px}.safe{background:var(--mint);color:var(--teal)}
+.notice{margin-top:18px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:17px;padding:16px 18px;font-size:11px;line-height:1.65}.notice strong{display:block;margin-bottom:4px}
+/* Live Capture */
+.capture-banner{margin-top:18px;padding:17px;border:1px solid #cfe4e0;background:linear-gradient(135deg,#f3fcfa,#fff);border-radius:18px;display:flex;justify-content:space-between;align-items:center;gap:18px}.capture-copy h2{font:800 18px Manrope;margin:0 0 4px}.capture-copy p{font-size:11px;color:var(--muted);margin:0;line-height:1.55;max-width:720px}.livephoto-badge{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:800;color:var(--teal);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}.livephoto-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px #078b7816}
+.mobile-capture{display:none;border:1px solid var(--line);background:#f7fbfc;border-radius:13px;padding:12px;font-size:10px;line-height:1.55;margin-top:10px}.mobile-capture.show{display:block}.mobile-capture button{margin-top:9px;width:100%}.capture-preview{display:none;margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden}.capture-preview.show{display:block}.capture-preview img,.capture-preview video{width:100%;max-height:260px;object-fit:cover;display:block}.modal{position:fixed;inset:0;background:rgba(11,28,43,.62);display:none;align-items:center;justify-content:center;padding:24px;z-index:5000}body.modal-open{overflow:hidden}.modal.open{display:flex}.capture-card{width:min(1080px,100%);max-height:calc(100vh - 48px);background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.25)}.capture-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.capture-head h3{font:800 18px Manrope;margin:0}.close{border:1px solid var(--line);background:#fff;border-radius:9px;width:34px;height:34px}.capture-body{display:grid;grid-template-columns:1.15fr .85fr;gap:0}.preview{background:#08131d;min-height:520px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.preview video{width:100%;height:520px;object-fit:cover;display:block;transform:none}.preview .hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(0,0,0,.58);color:#fff;padding:9px 12px;border-radius:10px;font-size:10px;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}.camera-mode{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 10px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.frame-guide{position:absolute;inset:11% 8%;border:1px solid rgba(255,255,255,.35);border-radius:22px;pointer-events:none}.frame-guide:after{content:"Point the camera at the incident";position:absolute;left:50%;top:-16px;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;white-space:nowrap}.capture-side{padding:19px}.step{display:flex;gap:10px;margin-bottom:16px}.stepnum{width:27px;height:27px;border-radius:50%;background:#eef5f8;display:grid;place-items:center;font-size:10px;font-weight:800;flex:0 0 auto}.step h4{font-size:12px;margin:0 0 3px}.step p{margin:0;color:var(--muted);font-size:10px;line-height:1.5}.capture-status{border:1px solid var(--line);border-radius:13px;padding:12px;font-size:10px;background:#fbfdfe}.capture-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.capture-actions button{flex:1;min-width:110px}.capture-result{display:none;margin-top:12px;border:1px solid #cfe4e0;background:var(--mint);border-radius:12px;padding:10px;font-size:10px;color:var(--navy)}.capture-result.show{display:block}.recording{animation:pulse 1.2s infinite}.record-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e05252;margin-right:5px}@keyframes pulse{50%{opacity:.68}}
+@media(max-width:1050px){.quick{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.capture-body{grid-template-columns:1fr}.capture-card{max-height:calc(100vh - 28px)}.preview{min-height:350px}.preview video{height:350px}}@media(max-width:700px){.main{padding:22px 18px 55px}.topin{padding:0 18px}.navlinks a{display:none}.back{display:block}.hero{display:block}.hero h1{font-size:31px}.location{margin-top:15px;min-width:auto}.quick{grid-template-columns:1fr 1fr}.panelhead{align-items:flex-start}.headactions{flex-wrap:wrap}.incidentlist{grid-template-columns:1fr}.capture-banner{display:block}.capture-actions{flex-direction:column}.capture-actions button{width:100%}}@media(max-width:460px){.quick{grid-template-columns:1fr}.quickcard{padding:13px}.panelhead{display:block}.headactions{margin-top:11px}.headactions button{width:100%}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin"><a class="brand" href="index.html"><span class="logo">R</span>ResQNet</a><div class="navlinks"><a href="index.html">Home</a><a href="index.html#abstract">About</a><a href="index.html#flow">How it works</a><a class="back" href="index.html">← Back to Home</a></div></div></header>
+<main class="main">
+<section class="hero"><div><div class="eyebrow">Public / Citizen Access</div><h1>Your local crisis picture.</h1><p>One professional workspace for situational awareness: capture an incident from your own device, view mapped reports, and check nearby hospitals, ambulances, rescue teams and shelters.</p></div><div class="location"><b>📍 Your location</b><small id="loc">Finding your location…</small><button class="locbtn" onclick="locate()">Use my location</button></div></section>
+
+<section class="quick">
+<div class="quickcard"><div class="qtop"><strong>Hospitals</strong><span class="qicon">🏥</span></div><div class="qvalue">12</div><div class="qmeta">7 available · 5 monitored</div></div>
+<div class="quickcard"><div class="qtop"><strong>Ambulances</strong><span class="qicon">🚑</span></div><div class="qvalue">08</div><div class="qmeta">5 available · 3 assigned</div></div>
+<div class="quickcard"><div class="qtop"><strong>Rescue teams</strong><span class="qicon">🚒</span></div><div class="qvalue">06</div><div class="qmeta">4 active · 2 deployed</div></div>
+<div class="quickcard"><div class="qtop"><strong>Open shelters</strong><span class="qicon">🏠</span></div><div class="qvalue">09</div><div class="qmeta">Capacity shown by demo data</div></div>
+</section>
+
+<section class="capture-banner"><div class="capture-copy"><div class="livephoto-badge"><span class="livephoto-dot"></span>Live incident capture · Available to all citizens</div><h2>Capture what is happening around you</h2><p>Every visitor can open the incident camera without signing in. Use the device environment camera to capture a still frame plus a short motion clip, similar to a lightweight “Live Photo” moment.</p><div style="margin-top:10px;color:var(--muted);font-size:10px"><strong style="color:var(--navy)">No account required.</strong> Your browser will ask for camera permission the first time you use it.</div></div><button class="primary" onclick="openCapture()">📷 Capture Live Incident</button></section>
+
+<div class="grid" style="margin-top:18px">
+<section class="panel"><div class="panelhead"><div><h2>Live incident map</h2><span class="sub">Public-facing status markers and nearby response resources</span></div><div class="headactions"><button class="secondary" onclick="locate()">Locate me</button></div></div><div id="map"></div><div class="mapfoot"><span class="pill"><i class="dot red"></i>Help needed</span><span class="pill"><i class="dot orange"></i>Affected</span><span class="pill"><i class="dot green"></i>Rescued / stable</span><span class="pill">🏥 Hospital</span><span class="pill">🚑 Ambulance</span><span class="pill">🚒 Rescue team</span></div></section>
+
+<aside>
+<section class="panel"><div class="panelhead"><div><h2>Nearby response network</h2><span class="sub">Availability cards are ready for live-provider integration</span></div></div><div class="resources">
+<div class="resource"><div class="rline"><strong>🏥 Emergency General Hospital</strong><span class="status available">AVAILABLE</span></div><p>3.1 km · Emergency department open · Capacity indicator</p><div class="capacity"><span style="width:68%"></span></div><div class="mini"><span>68% current capacity</span><span>Updated 2 min ago</span></div><button class="view" onclick="showDetails('hospital')">View hospital details →</button></div>
+<div class="resource"><div class="rline"><strong>🚑 Ambulance Unit A-14</strong><span class="status available">AVAILABLE</span></div><p>4.2 km · Response team on standby · Estimated dispatch 6 min</p><button class="view" onclick="showDetails('ambulance')">View ambulance status →</button></div>
+<div class="resource"><div class="rline"><strong>🚑 Ambulance Unit B-03</strong><span class="status limited">BUSY</span></div><p>5.0 km · Currently assigned to an incident · ETA not available</p><button class="view" onclick="showDetails('ambulanceBusy')">View assignment →</button></div>
+<div class="resource"><div class="rline"><strong>🚒 Rescue Team North</strong><span class="status available">ACTIVE</span></div><p>2.7 km · 6 responders · Water rescue capability</p><button class="view" onclick="showDetails('rescue')">View rescue team →</button></div>
+<div class="resource"><div class="rline"><strong>🏠 Relief Shelter 04</strong><span class="status available">OPEN</span></div><p>2.0 km · 120 spaces shown in prototype dataset</p><button class="view" onclick="showDetails('shelter')">View shelter details →</button></div>
+</div></section>
+
+<section class="panel camera"><div class="panelhead"><div><h2>Public incident camera</h2><span class="sub">Example of an authorized public/municipal feed</span></div><span class="live"><i></i>LIVE DEMO</span></div><img class="cameraimg" src="https://images.pexels.com/photos/28447788/pexels-photo-28447788.jpeg?cs=srgb&dl=pexels-helen1-28447788.jpg&fm=jpg" alt="Flood response scene"><div class="caminfo"><div class="camrow"><h3 style="margin:0">Sector 7 — Main Road</h3></div><p>This panel is simulated in the prototype. A production build should connect only to authorized public feeds and show source, timestamp and access status.</p><div class="camactions"><button class="secondary" onclick="openCapture()">Open my camera</button><button class="secondary" onclick="showDetails('camera')">Feed details</button></div></div></section>
+</aside>
+</div>
+
+<section class="panel incidents"><div class="panelhead"><div><h2>Nearby incident updates</h2><span class="sub">Public-facing summaries — verify critical information through official channels</span></div></div><div class="incidentlist">
+<div class="incident"><span class="badge">HELP NEEDED</span><h3>Sector 7 flooding</h3><p>Road access is reported as difficult. Rescue Team North is shown nearby. Last public update: 4 min ago.</p></div>
+<div class="incident"><span class="badge" style="background:#fff5df;color:#a96d0c">AFFECTED</span><h3>Riverside junction</h3><p>Water level reported elevated. Alternate route recommended by the current prototype status.</p></div>
+<div class="incident"><span class="badge safe">RESCUED / STABLE</span><h3>East bridge</h3><p>Earlier help request marked stable after responder update. Continue monitoring for changes.</p></div>
+</div></section>
+
+<div class="notice"><strong>Important</strong>Hospital, ambulance, rescue-team, camera and incident values shown here are prototype/demo data unless a verified live provider is connected. Your device camera remains local to the browser until the app is extended with a secure upload/reporting endpoint. In an actual emergency, follow local emergency-service instructions.</div>
+</main>
+
+<div class="modal" id="captureModal" aria-hidden="true"><div class="capture-card"><div class="capture-head"><div><h3>Live Incident Capture</h3><span class="sub">Rear / environment camera · still frame + short motion clip</span></div><button class="close" onclick="closeCapture()">✕</button></div><div class="capture-body"><div class="preview"><video id="preview" autoplay playsinline muted></video><div class="camera-mode" id="cameraMode">Environment camera preferred</div><div class="frame-guide"></div><div class="hint" id="previewHint">Use the rear/environment camera and point it at the incident.</div></div><div class="capture-side"><div class="step"><div class="stepnum">1</div><div><h4>Point at the incident</h4><p>This camera is available to every citizen visitor. ResQNet requests the rear/environment camera first so the preview is aimed outward, not at the person holding the phone.</p></div></div><div class="step"><div class="stepnum">2</div><div><h4>Capture the moment</h4><p>Press Capture to save a still frame and a brief motion clip, similar to a lightweight Live Photo moment.</p></div></div><div class="step"><div class="stepnum">3</div><div><h4>Switch camera when needed</h4><p>On devices with multiple cameras, use Switch Camera to choose another available lens. If a device only has a front webcam, that hardware cannot provide a rear view.</p></div></div><div class="capture-status" id="captureStatus">Camera is off. Any visitor can start it; browser permission is required by the device.</div><div style="margin-top:10px;font-size:10px;color:var(--muted)"><strong>Mobile note:</strong> For camera permission, open ResQNet directly in Chrome or Safari. WhatsApp/Instagram in-app browsers may block camera access.</div><div class="mobile-capture" id="mobileFallback"><strong>Phone camera mode</strong><br>This device/browser cannot show a live preview here. Use your phone camera directly to capture the incident — no account or website setup is required.<button class="primary" type="button" onclick="usePhoneCamera()">📱 Open phone camera</button><input id="incidentPhotoInput" type="file" accept="image/*" capture="environment" style="display:none"><input id="incidentVideoInput" type="file" accept="video/*" capture="environment" style="display:none"></div><div class="capture-preview" id="capturePreview"></div><div class="capture-actions"><button class="secondary" id="startCamBtn" onclick="startCamera()">Start live preview</button><button class="secondary" id="switchCamBtn" onclick="switchCamera()" disabled>Switch camera</button><button class="primary" id="captureBtn" onclick="captureLivePhoto()" disabled>Capture incident</button><button class="secondary" onclick="closeCapture()">Close</button></div><div class="capture-result" id="captureResult"></div></div></div></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const defaultCenter=[13.0827,80.2707];
+const map=L.map('map').setView(defaultCenter,12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
+const points=[
+ {p:[13.075,80.255],t:'Help needed',n:'Sector 7 flooding',c:'#d95858'},
+ {p:[13.095,80.282],t:'Affected',n:'Riverside junction',c:'#d99028'},
+ {p:[13.065,80.292],t:'Rescued / stable',n:'East bridge',c:'#078b78'},
+ {p:[13.088,80.265],t:'Hospital',n:'Emergency General Hospital',c:'#1c78a8'},
+ {p:[13.103,80.258],t:'Rescue team',n:'Rescue Team North',c:'#6a4fa3'}
+];
+points.forEach(x=>L.circleMarker(x.p,{radius:9,color:x.c,fillColor:x.c,fillOpacity:.82,weight:2}).addTo(map).bindPopup('<b>'+x.n+'</b><br>'+x.t));
+let userMarker=null;
+function locate(){
+ const el=document.getElementById('loc');
+ if(!navigator.geolocation){el.textContent='Location is not supported by this browser.';return}
+ el.textContent='Requesting location permission…';
+ navigator.geolocation.getCurrentPosition(pos=>{const p=[pos.coords.latitude,pos.coords.longitude];if(userMarker)userMarker.remove();userMarker=L.circleMarker(p,{radius:10,color:'#102b46',fillColor:'#078b78',fillOpacity:1,weight:3}).addTo(map).bindPopup('<b>Your approximate location</b>').openPopup();map.setView(p,14);el.textContent=p[0].toFixed(4)+', '+p[1].toFixed(4)},()=>{el.textContent='Location unavailable — showing demo area.'});
+}
+
+const details={
+ hospital:['Emergency General Hospital','Emergency department open · 68% capacity','Beds: 32 available · ICU: 6 monitored · Emergency intake: ON · Contact routing: demo'],
+ ambulance:['Ambulance Unit A-14','AVAILABLE · 4.2 km away','Crew: 3 responders · Equipment: standard emergency kit · Dispatch estimate: 6 min'],
+ ambulanceBusy:['Ambulance Unit B-03','BUSY · assigned to active incident','Current assignment: Riverside junction · Return status will update when cleared'],
+ rescue:['Rescue Team North','ACTIVE · 6 responders','Water rescue capability · Staging area: North sector · Status: ready for dispatch'],
+ shelter:['Relief Shelter 04','OPEN · 120 spaces in prototype dataset','Accessibility: supported · Water point: yes · Intake desk: active'],
+ camera:['Sector 7 — Main Road','Authorized-feed demo panel','Prototype source only · Production requires authenticated public/municipal stream access']
+};
+function showDetails(key){const d=details[key];if(!d)return;alert(d[0]+'\n\n'+d[1]+'\n\n'+d[2]);}
+
+let stream=null, mediaRecorder=null, chunks=[], videoDevices=[], currentDeviceIndex=0;
+const modal=document.getElementById('captureModal'), video=document.getElementById('preview'), statusEl=document.getElementById('captureStatus'), hint=document.getElementById('previewHint'), captureBtn=document.getElementById('captureBtn'), result=document.getElementById('captureResult'), switchBtn=document.getElementById('switchCamBtn'), startBtn=document.getElementById('startCamBtn'), cameraMode=document.getElementById('cameraMode');
+function openCapture(){modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');result.classList.remove('show');if(!stream)startCamera()}
+function closeCapture(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');stopCamera();result.classList.remove('show');}
+function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}video.srcObject=null;captureBtn.disabled=true;switchBtn.disabled=true;startBtn.disabled=false;statusEl.textContent='Camera is off. Available to all visitors; browser permission is required.';hint.textContent='Use the rear/environment camera and point it at the incident.';cameraMode.textContent='Environment camera preferred'}
+async function loadCameraDevices(){try{const devices=await navigator.mediaDevices.enumerateDevices();videoDevices=devices.filter(d=>d.kind==='videoinput');switchBtn.disabled=videoDevices.length<2;return videoDevices}catch(e){videoDevices=[];switchBtn.disabled=true;return []}}
+function preferredDeviceIndex(devices){const preferred=devices.findIndex(d=>/back|rear|environment|world/i.test(d.label));return preferred>=0?preferred:0}
+function showMobileFallback(message){document.getElementById("mobileFallback").classList.add("show");statusEl.textContent=message||"Use your phone camera directly to capture the incident.";hint.textContent="Phone camera mode: capture the incident outside the selfie preview.";cameraMode.textContent="Phone camera capture";captureBtn.disabled=true;switchBtn.disabled=true;startBtn.disabled=false}
+function usePhoneCamera(){const input=document.getElementById("incidentPhotoInput");input.value="";input.click()}
+document.getElementById("incidentPhotoInput").addEventListener("change",function(){handleMobileFile(this.files&&this.files[0],"image")});
+document.getElementById("incidentVideoInput").addEventListener("change",function(){handleMobileFile(this.files&&this.files[0],"video")});
+function handleMobileFile(file,type){if(!file)return;const wrap=document.getElementById("capturePreview");const url=URL.createObjectURL(file);wrap.classList.add("show");wrap.innerHTML=type==="image"?`<img src="${url}" alt="Captured incident">`:`<video src="${url}" controls playsinline></video>`;result.classList.add("show");result.innerHTML='<strong>Incident capture ready</strong><br>'+(type==="image"?'Still incident photo captured from the phone camera.':'Incident video captured from the phone camera.')+'<br><br><em>Next step: attach incident type, description and location, then submit for verification.</em>';statusEl.textContent='Incident media captured on this device.';}
+async function startCamera(deviceId=null){
+ if(!window.isSecureContext){showMobileFallback("Live browser preview needs HTTPS. Use the phone camera option below — it works without website hosting.");return}
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){showMobileFallback("This browser does not expose live camera preview. Use the phone camera option below.");return}
+ stopCamera();
+ try{
+   const constraints=deviceId?{video:{deviceId:{exact:deviceId},width:{ideal:1280},height:{ideal:720}}}:{video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}};
+   stream=await navigator.mediaDevices.getUserMedia(constraints);video.srcObject=stream;await video.play();
+   const devices=await loadCameraDevices();
+   const active=stream.getVideoTracks()[0];const settings=active.getSettings();
+   const label=active.label||'';
+   const looksRear=/back|rear|environment|world/i.test(label)||(settings.facingMode==='environment');
+   currentDeviceIndex=Math.max(0,devices.findIndex(d=>d.deviceId===settings.deviceId));
+   captureBtn.disabled=false;startBtn.disabled=true;switchBtn.disabled=devices.length<2;
+   cameraMode.textContent=looksRear?'Rear / environment camera':'Front / available camera';
+   hint.textContent=looksRear?'Camera aimed outward. Frame the incident, then capture.':'A rear camera was not available. This device is using its available camera.';
+   statusEl.textContent=looksRear?'Camera ready — incident framing mode active.':'Camera ready — no rear camera was detected on this device.';
+ }catch(e){
+   let msg='Camera could not be started.';
+   if(e && e.name==='NotAllowedError') msg='Camera permission was blocked. Tap the lock/site-settings icon in Chrome/Safari and allow Camera, then reload.';
+   else if(e && e.name==='NotFoundError') msg='No camera was found on this device.';
+   else if(e && e.name==='NotReadableError') msg='The camera is already being used by another app. Close it and try again.';
+   else if(e && e.name==='SecurityError') msg='Camera access is blocked by the browser security policy. Open this site directly in Chrome/Safari over HTTPS.';
+   else if(e && e.name==='OverconstrainedError') msg='The requested camera mode is unavailable. Try Switch camera.';
+   statusEl.textContent=msg;hint.textContent='For the most reliable mobile capture, use Chrome/Safari directly — not an in-app browser.';cameraMode.textContent='Camera unavailable';showMobileFallback(msg);
+ }
+}
+async function switchCamera(){
+ const devices=await loadCameraDevices();if(devices.length<2)return;
+ currentDeviceIndex=(currentDeviceIndex+1)%devices.length;
+ const dev=devices[currentDeviceIndex];
+ await startCamera(dev.deviceId);
+}
+async function captureLivePhoto(){
+ if(!stream||video.readyState<2)return;
+ captureBtn.disabled=true;captureBtn.classList.add('recording');statusEl.innerHTML='<span class="record-dot"></span>Capturing the incident moment…';chunks=[];
+ const canvas=document.createElement('canvas');canvas.width=video.videoWidth||1280;canvas.height=video.videoHeight||720;canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+ const still=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.92));
+ let recorder;
+ try{recorder=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm'});}catch(e){recorder=null}
+ if(recorder){mediaRecorder=recorder;recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onstop=()=>{finishCapture(still,new Blob(chunks,{type:'video/webm'}));};recorder.start();setTimeout(()=>{if(recorder.state!=='inactive')recorder.stop()},1800)}
+ else{finishCapture(still,null)}
+}
+function finishCapture(still,clip){
+ captureBtn.classList.remove('recording');captureBtn.disabled=false;statusEl.textContent='Incident capture complete.';const stamp=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});result.classList.add('show');result.innerHTML='<strong>Incident media package created</strong><br>Still frame captured at '+stamp+'. '+(clip?'A short motion clip was captured to preserve the moment around the still image.':'Your browser could save the still frame, but short-video recording is unavailable.')+'<br><br><em>Next step: attach incident type, description and location, then submit for verification.</em>';
+}
+</script>
+</body></html>
